@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 class PrimaryRaisedButton extends StatelessWidget {
-  const PrimaryRaisedButton({this.onPressed, this.label});
+  const PrimaryRaisedButton({ this.onPressed, this.label });
 
   final Widget label;
   final VoidCallback onPressed;
@@ -29,4 +29,24 @@ class PrimaryRaisedButton extends StatelessWidget {
         label: label,
         icon: const Icon(Icons.add),
       );
+}
+
+class SecondaryButton extends StatelessWidget {
+  const SecondaryButton({ this.onPressed, this.label, this.icon });
+
+  final Widget label;
+  final VoidCallback onPressed;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) => icon != null ? FlatButton.icon(
+    textColor: Theme.of(context).accentColor,
+    onPressed: onPressed,
+    label: label,
+    icon: Icon(icon),
+  ) : FlatButton(
+    textColor: Theme.of(context).accentColor,
+    onPressed: onPressed,
+    child: label,
+  );
 }

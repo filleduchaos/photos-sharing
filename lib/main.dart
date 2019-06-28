@@ -46,20 +46,27 @@ class MyApp extends StatelessWidget {
 
 ThemeData _buildTheme() {
   final ThemeData base = ThemeData.light();
+  final textTheme = Typography.blackMountainView.apply(fontFamily: 'Poppins');
+
   return base.copyWith(
     primaryColor: Colors.white,
     primaryColorBrightness: Brightness.light,
-    primaryTextTheme: Typography.blackMountainView,
+    primaryTextTheme: textTheme,
+    textTheme: textTheme,
     primaryIconTheme: const IconThemeData(
       color: Colors.grey,
     ),
-    accentColor: Colors.green[800],
+    accentColor: Colors.deepPurple[800],
     buttonTheme: base.buttonTheme.copyWith(
-      buttonColor: Colors.green[800],
+      buttonColor: Colors.deepPurple[800],
       textTheme: ButtonTextTheme.primary,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(4),
       ),
+    ),
+    floatingActionButtonTheme: FloatingActionButtonThemeData(
+      backgroundColor: Colors.deepPurple[800],
+      foregroundColor: Colors.white,
     ),
     scaffoldBackgroundColor: Colors.white,
   );

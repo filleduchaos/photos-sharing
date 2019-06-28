@@ -88,8 +88,10 @@ class PhotosLibraryApiModel extends Model {
 
   Future<Album> createAlbum(String title) async {
     // TODO(codelab): Implement this call.
-
     return null;
+    // final album = await client.createAlbum(CreateAlbumRequest.fromTitle(title));
+    // updateAlbums();
+    // return album;
   }
 
   Future<Album> getAlbum(String id) async {
@@ -136,16 +138,25 @@ class PhotosLibraryApiModel extends Model {
 
     return null;
 
-    // Construct the request with the token, albumId and description.
+    // // Construct the request with the token, albumId and description.
+    // final BatchCreateMediaItemsRequest request =
+    //     BatchCreateMediaItemsRequest.inAlbum(uploadToken, albumId, description);
 
-    // Make the API call to create the media item. The response contains a
-    // media item.
+    // // Make the API call to create the media item. The response contains a
+    // // media item.
+    // return client
+    //     .batchCreateMediaItems(request)
+    //     .then((BatchCreateMediaItemsResponse response) {
+    //       // Print and return the response.
+    //       print(response.newMediaItemResults[0].toJson());
+    //       return response;
+    //     });
   }
 
   UnmodifiableListView<Album> get albums =>
       UnmodifiableListView<Album>(_albums ?? <Album>[]);
 
-  void updateAlbums() async {
+  Future<void> updateAlbums() async {
     // Reset the flag before loading new albums
     hasAlbums = false;
 
@@ -153,21 +164,20 @@ class PhotosLibraryApiModel extends Model {
     _albums.clear();
 
     // Add albums from the user's Google Photos account
-     var ownedAlbums = await _loadAlbums();
-     if (ownedAlbums != null) {
-       _albums.addAll(ownedAlbums);
-     }
+    var ownedAlbums = await _loadAlbums();
+    if (ownedAlbums != null) {
+      _albums.addAll(ownedAlbums);
+    }
 
-    /*
-    // Load albums from owned and shared albums
-    final List<List<Album>> list =
-    await Future.wait([_loadSharedAlbums(), _loadAlbums()]);
+    // TODO(codelab): Load both own and shared albums.
+    // // Load albums from owned and shared albums
+    // final List<List<Album>> list =
+    // await Future.wait([_loadSharedAlbums(), _loadAlbums()]);
 
-    _albums.addAll(list.expand((a) => a ?? []));
-    */
+    // _albums.addAll(list.expand((a) => a ?? []));
 
-    notifyListeners();
-    hasAlbums = true;
+    // notifyListeners();
+    // hasAlbums = true;
   }
 
   /// Load Albums into the model by retrieving the list of all albums shared

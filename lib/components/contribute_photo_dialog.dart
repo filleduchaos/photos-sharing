@@ -19,9 +19,17 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:scoped_model/scoped_model.dart';
+import 'package:sharing_codelab/components/buttons.dart';
 import 'package:sharing_codelab/model/photos_library_api_model.dart';
-import 'package:sharing_codelab/pages/trip_page.dart';
+import 'package:sharing_codelab/components/dialogs.dart';
 import 'package:sharing_codelab/util/to_be_implemented.dart';
+
+class ContributePhotoResult {
+  ContributePhotoResult(this.uploadToken, this.description);
+
+  String uploadToken;
+  String description;
+}
 
 class ContributePhotoDialog extends StatefulWidget {
   @override
@@ -37,31 +45,26 @@ class _ContributePhotoDialogState extends State<ContributePhotoDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        child: SingleChildScrollView(
-          child: IntrinsicHeight(
-            child: Column(
-              children: <Widget>[
-                _buildUploadButton(context),
-                TextFormField(
-                  controller: descriptionController,
-                  decoration: InputDecoration(
-                      labelText: 'Add a description',
-                      labelStyle: TextStyle(
-                        color: Colors.black,
-                      )),
+    return StyledDialog(
+      child: SingleChildScrollView(
+        child: IntrinsicHeight(
+          child: Column(
+            children: <Widget>[
+              _buildUploadButton(context),
+              TextFormField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Add a description',
+                  labelStyle: TextStyle(color: Colors.black),
                 ),
-                Align(
-                  child: _buildAddButton(context),
-                  alignment: const FractionalOffset(1, 0),
-                )
-              ],
-            ),
+                maxLines: 4,
+                minLines: 1,
+              ),
+              Align(
+                child: _buildAddButton(context),
+                alignment: const FractionalOffset(1, 0),
+              )
+            ],
           ),
         ),
       ),
@@ -89,12 +92,12 @@ class _ContributePhotoDialogState extends State<ContributePhotoDialog> {
     return RaisedButton(
       child: const Text('ADD'),
       onPressed: () => Navigator.pop(
-            context,
-            ContributePhotoResult(
-              _uploadToken,
-              descriptionController.text,
-            ),
-          ),
+        context,
+        ContributePhotoResult(
+          _uploadToken,
+          descriptionController.text,
+        ),
+      ),
     );
   }
 
@@ -119,32 +122,54 @@ class _ContributePhotoDialogState extends State<ContributePhotoDialog> {
     // TODO(developer): Implement error display
 
     // No image has been selected yet
-    return Container(
-      padding: const EdgeInsets.all(12),
-      child: FlatButton.icon(
-        onPressed: () => _getImage(context),
-        label: const Text('UPLOAD PHOTO'),
-        textColor: Colors.green[800],
-        icon: const Icon(Icons.file_upload),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [ImageSource.camera, ImageSource.gallery].map((source) {
+          return SecondaryButton(
+              onPressed: () => _getImage(context, source),
+              label: source == ImageSource.camera
+                      ? const Text('TAKE PHOTO')
+                      : const Text('UPLOAD'),
+              icon: source == ImageSource.camera
+                      ? Icons.camera_alt
+                      : Icons.file_upload,
+            // ),
+          );
+        }).toList(),
       ),
     );
   }
 
-  Future _getImage(BuildContext context) async {
+  Future _getImage(BuildContext context, ImageSource source) async {
     // TODO(codelab): Implement this method.
 
     ToBeImplemented.showMessage();
 
-    // Use the image_picker package to prompt the user for a photo from their
-    // device.
+  //   // Use the image_picker package to prompt the user for a photo from their
+  // // device.
+  //   final File image = await ImagePicker.pickImage(
+  //     source: source,
+  //   );
 
-    // Store the image that was selected.
+  //   // Store the image that was selected.
+  //   setState(() {
+  //     _image = image;
+  //     _isUploading = true;
+  //   });
 
-    // Make a request to upload the image to Google Photos once it was selected.
+  //   // Make a request to upload the image to Google Photos once it was selected.
+  //   final String uploadToken =
+  //       await ScopedModel.of<PhotosLibraryApiModel>(context)
+  //           .uploadMediaItem(image);
 
-
-      // Once the upload process has completed, store the upload token.
-      // This token is used together with the description to create the media
-      // item later.
+  //   setState(() {
+  //     // Once the upload process has completed, store the upload token.
+  //     // This token is used together with the description to create the media
+  //     // item later.
+  //     _uploadToken = uploadToken;
+  //     _isUploading = false;
+  //   });
   }
 }

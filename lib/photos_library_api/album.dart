@@ -29,6 +29,8 @@ class Album {
 
   Map<String, dynamic> toJson() => _$AlbumToJson(this);
 
+  bool get isEmpty => coverPhotoBaseUrl == null || mediaItemsCount == null;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||

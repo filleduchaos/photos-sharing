@@ -30,4 +30,6 @@ class SearchMediaItemsResponse {
 
   List<MediaItem> mediaItems;
   String nextPageToken;
+
+  bool get isEmpty => mediaItems == null || mediaItems.isEmpty;
 }

@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:sharing_codelab/model/photos_library_api_model.dart';
-import 'package:sharing_codelab/pages/create_trip_page.dart';
-import 'package:sharing_codelab/pages/join_trip_page.dart';
-import 'package:sharing_codelab/components/primary_raised_button.dart';
-import 'package:sharing_codelab/components/trip_app_bar.dart';
+import 'package:sharing_codelab/components/buttons.dart';
+import 'package:sharing_codelab/components/create_trip_dialog.dart';
+import 'package:sharing_codelab/components/join_trip_dialog.dart';
+import 'package:sharing_codelab/components/app_bar.dart';
+import 'package:sharing_codelab/components/trip_card.dart';
 import 'package:sharing_codelab/pages/trip_page.dart';
-import 'package:sharing_codelab/photos_library_api/album.dart';
 import 'package:sharing_codelab/util/to_be_implemented.dart';
 
 class TripListPage extends StatelessWidget {
@@ -33,135 +32,81 @@ class TripListPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: TripAppBar(),
-      body: _buildTripList(),
-    );
-  }
+      body: ScopedModelDescendant<PhotosLibraryApiModel>(
+        builder: (BuildContext context, Widget child,
+            PhotosLibraryApiModel photosLibraryApi) {
+          if (!photosLibraryApi.hasAlbums) {
+            return Center(
+              child: const CircularProgressIndicator(),
+            );
+          }
 
-  Widget _buildTripList() {
-    return ScopedModelDescendant<PhotosLibraryApiModel>(
-      builder: (BuildContext context, Widget child,
-          PhotosLibraryApiModel photosLibraryApi) {
-        if (!photosLibraryApi.hasAlbums) {
-          return Center(
-            child: const CircularProgressIndicator(),
-          );
-        }
+          if (photosLibraryApi.albums.isEmpty) {
+            return const EmptyAlbumList();
+          }
 
-        if (photosLibraryApi.albums.isEmpty) {
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: <Widget>[
-              SvgPicture.asset(
-                'assets/ic_fieldTrippa.svg',
-                color: Colors.grey[300],
-                height: 148,
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
-                  "You're not currently a member of any trip albums. "
-                      'Create a new trip album or join an existing one below.',
-                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              _buildButtons(context),
-            ],
-          );
-        }
+          return ListView.builder(
+            itemCount: photosLibraryApi.albums.length + 1,
+            itemBuilder: (BuildContext context, int index) {
+              if (index == 0) {
+                return const TripAlbumButtons();
+              }
 
-        return ListView.builder(
-          itemCount: photosLibraryApi.albums.length + 1,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 0) {
-              return _buildButtons(context);
-            }
+              final album = photosLibraryApi.albums[index - 1];
 
-            return _buildTripCard(
-                context, photosLibraryApi.albums[index - 1], photosLibraryApi);
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildTripCard(BuildContext context, Album sharedAlbum,
-      PhotosLibraryApiModel photosLibraryApi) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: const BorderRadius.all(Radius.circular(8)),
-      ),
-      elevation: 3,
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.symmetric(
-        vertical: 12,
-        horizontal: 33,
-      ),
-      child: InkWell(
-        onTap: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (BuildContext context) => TripPage(
-                      album: sharedAlbum,
+              return TripCard(
+                album: album,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => TripPage(
+                      album: album,
                       searchResponse:
-                          photosLibraryApi.searchMediaItems(sharedAlbum.id),
-                    ),
-              ),
-            ),
-        child: Column(
-          children: <Widget>[
-            Container(
-              child: _buildTripThumbnail(sharedAlbum),
-            ),
-            Container(
-              height: 52,
-              padding: const EdgeInsets.only(left: 8),
-              child: Row(mainAxisAlignment: MainAxisAlignment.start, children: [
-                _buildSharedIcon(sharedAlbum),
-                Align(
-                  alignment: const FractionalOffset(0, 0.5),
-                  child: Text(
-                    sharedAlbum.title ?? '[no title]',
-                    style: TextStyle(
-                      fontSize: 18,
+                          photosLibraryApi.searchMediaItems(album.id),
                     ),
                   ),
                 ),
-              ]),
-            ),
-          ],
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }
+}
 
-  Widget _buildTripThumbnail(Album sharedAlbum) {
-    if (sharedAlbum.coverPhotoBaseUrl == null ||
-        sharedAlbum.mediaItemsCount == null) {
-      return Container(
-        height: 160,
-        width: 346,
-        color: Colors.grey[200],
-        padding: const EdgeInsets.all(5),
-        child: SvgPicture.asset(
+class EmptyAlbumList extends StatelessWidget {
+  const EmptyAlbumList();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        SvgPicture.asset(
           'assets/ic_fieldTrippa.svg',
-          color: Colors.grey[350],
+          color: Theme.of(context).accentColor.withOpacity(.25),
+          height: 148,
         ),
-      );
-    }
-
-    return CachedNetworkImage(
-      imageUrl: '${sharedAlbum.coverPhotoBaseUrl}=w346-h160-c',
-      placeholder: (BuildContext context, String url) =>
-          const CircularProgressIndicator(),
-      errorWidget: (BuildContext context, String url, Object error) {
-        print(error);
-        return const Icon(Icons.error);
-      },
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 48),
+          child: Text(
+            "You're not currently a member of any trip albums.",
+            style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+        ),
+        const TripAlbumButtons(),
+      ],
     );
   }
+}
 
-  Widget _buildButtons(BuildContext context) {
+class TripAlbumButtons extends StatelessWidget {
+  const TripAlbumButtons();
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(30),
       child: Column(
@@ -170,52 +115,34 @@ class TripListPage extends StatelessWidget {
         children: <Widget>[
           PrimaryRaisedButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => CreateTripPage(),
-                ),
+              showDialog(
+                context: context,
+                builder: (_) => const CreateTripDialog(),
               );
             },
             label: const Text('CREATE A TRIP ALBUM'),
           ),
-          Container(
-            padding: const EdgeInsets.only(top: 10),
+          const Padding(
+            padding: EdgeInsets.only(top: 10),
             child: Text(
-              ' - or - ',
+              ' - OR - ',
               style: TextStyle(
                 color: Colors.grey,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-          FlatButton(
-            textColor: Colors.green[800],
+          SecondaryButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => JoinTripPage(),
-                ),
+              showDialog(
+                context: context,
+                builder: (_) => const JoinTripDialog(),
               );
             },
-            child: const Text('JOIN A TRIP ALBUM'),
+            label: const Text('JOIN A TRIP ALBUM'),
           ),
         ],
       ),
     );
-  }
-
-  Widget _buildSharedIcon(Album album) {
-    if (album.shareInfo != null) {
-      return const Padding(
-          padding: EdgeInsets.only(right: 8),
-          child: Icon(
-            Icons.folder_shared,
-            color: Colors.black38,
-          ));
-    } else {
-      return Container();
-    }
   }
 }
